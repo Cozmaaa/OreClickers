@@ -1,3 +1,8 @@
+import { Block } from "./blocks.js";
+import { BlockSimpleFactory } from "./blockSimpleFactory.js";
+import { Drawer } from "./drawer.js";
+import { WsDriver } from "./ws-conns.js";
+
 const canvas = document.getElementById("game") as HTMLCanvasElement;
 const canvasParent = canvas.parentElement!.getBoundingClientRect();
 const ctx = canvas.getContext("2d") as CanvasRenderingContext2D;
@@ -9,31 +14,36 @@ ctx.fillStyle = "white"
 ctx.fillRect(10, 10, canvas.width - 10, canvas.height - 10);
 
 
-class Game {
+export class Game {
     ctx: CanvasRenderingContext2D;
     image: HTMLImageElement;
     cursorImage: HTMLImageElement;
-    websocket: WebSocket;
     cursors: Record<string, number[]>;
     sendCursorTimeout: boolean
+    WsHandler: WsDriver
+    gameMatrix: number[][]
+    gameObject: Block[][];
+    isMatrixReady: boolean
+    blockSimpleFactory: BlockSimpleFactory
+    drawer: Drawer
     constructor(ctx: CanvasRenderingContext2D) {
 
         this.ctx = ctx;
         this.image = new Image(10, 10)
         this.image.onload = this.draw;
-        this.image.src = "./block.jpg"
+        this.image.src = "./images/block.jpg"
         this.cursorImage = new Image(25, 25)
-        this.cursorImage.src = "./cursor.png"
+        this.cursorImage.src = "./images/cursor.png"
         this.cursors = {};
         this.sendCursorTimeout = false;
+        this.gameMatrix = [[]]
+        this.gameObject = [[]]
+        this.isMatrixReady = false;
+        this.blockSimpleFactory = new BlockSimpleFactory()
+        this.drawer = new Drawer(this)
 
-        this.websocket = new WebSocket("ws://localhost:8080/ws")
+        this.WsHandler = new WsDriver(this)
 
-        this.websocket.onmessage = (event: MessageEvent<string>) => {
-            let data = JSON.parse(event.data);
-            this.cursors[data.Id] = data.CursorPosition;
-
-        }
 
         window.addEventListener("resize", () => {
             this.resize();
@@ -50,15 +60,15 @@ class Game {
 
     draw() {
 
+        if (!this.isMatrixReady) {
+            console.log("Matrix not ready yet")
+            return
+        }
         this.ctx.fillStyle = "black";
         this.ctx.fillRect(0, 0, this.ctx.canvas.width, this.ctx.canvas.height);
         this.ctx.fillStyle = "#87ceeb"; //cyan 
         this.ctx.fillRect(10, 10, this.ctx.canvas.width - 20, this.ctx.canvas.height - 20);
-        for (let y = 500; y < this.ctx.canvas.height; y += 100) {
-            for (let x = 10; x < this.ctx.canvas.width; x += 100) {
-                this.ctx.drawImage(this.image, x, y, 100, 100);
-            }
-        }
+        this.drawer.drawBlocks()
 
         this.drawCursors()
 
@@ -80,10 +90,11 @@ class Game {
         this.ctx.canvas.style.height = `${boundingElement.height}px`
     }
 
+
     sendCursorPosition(event: MouseEvent) {
         if (this.sendCursorTimeout) return;
 
-        this.websocket.send(`${event.clientX} ${event.clientY}`);
+        this.WsHandler.conn.send(`${event.clientX} ${event.clientY}`);
         this.sendCursorTimeout = true;
         setTimeout(() => {
             this.sendCursorTimeout = false;

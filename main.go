@@ -1,23 +1,21 @@
 package main
 
 import (
-	"bytes"
-	"encoding/json"
 	"fmt"
 	"net/http"
-	"strconv"
 
 	"github.com/gorilla/websocket"
 )
 
 type Server struct {
-	Players map[*Player]bool
-	NextId  int
+	Players    map[*Player]bool `json:"-"`
+	GameMatrix [][]int          `json:"gameMatrix"`
+	NextId     int              `json:"-"`
 }
 
 type Player struct {
 	Conn           *websocket.Conn `json:"-"`
-	ID             int             `json:"Id"`
+	ID             int             `json:"id"`
 	CursorPosition [2]int          `json:"CursorPosition"`
 }
 
@@ -31,8 +29,9 @@ var upgrader = websocket.Upgrader{
 
 func newServer() *Server {
 	return &Server{
-		Players: make(map[*Player]bool),
-		NextId:  1,
+		Players:    make(map[*Player]bool),
+		NextId:     1,
+		GameMatrix: generateMatrix(),
 	}
 }
 
@@ -44,52 +43,36 @@ func newPlayer(websocket *websocket.Conn, id int) *Player {
 	}
 }
 
-func parseCursorPosition(message []byte) [2]int {
-	parts := bytes.Split(message, []byte(" "))
-	x, err1 := strconv.Atoi(string(parts[0]))
-	y, err2 := strconv.Atoi(string(parts[1]))
-	if err1 != nil || err2 != nil {
-		panic(err1)
-	}
-	fmt.Println(x, y)
-	return [2]int{x, y}
-}
-
-func (s *Server) broadcastCursorPosition(player *Player) {
-	playerData, err := json.Marshal(player)
-	if err != nil {
-		fmt.Println("ERROR MARSHAL DATA")
-		return
-	}
-
-	for otherPlayers := range s.Players {
-		if otherPlayers == player {
-			continue
-		}
-		err := otherPlayers.Conn.WriteMessage(websocket.TextMessage, playerData)
-		if err != nil {
-			fmt.Println("ERROR SENDING DATA MARSHALL")
-			otherPlayers.Conn.Close()
-			return
-		}
-	}
-}
-
 func (s *Server) handleWs(w http.ResponseWriter, r *http.Request) {
 	conn, err := upgrader.Upgrade(w, r, nil)
 	player := newPlayer(conn, s.NextId)
 	s.NextId++
 	s.Players[player] = true
+
+	s.broadcastServerGameMatrix()
+	defer func() {
+		delete(s.Players, player)
+		conn.Close()
+		fmt.Println("Connection with a user ennded")
+	}()
+
 	if err != nil {
-		panic(err)
+		fmt.Println("Player left here")
+		return
 	}
 
 	for {
 		_, p, err := conn.ReadMessage()
 		if err != nil {
-			panic(err)
+			if websocket.IsCloseError(err, websocket.CloseNormalClosure, websocket.CloseGoingAway) {
+				fmt.Println("Player disconnected:", err)
+			} else {
+				fmt.Println("Error reading message:", err)
+			}
+			break
 		}
 
+		// fmt.Println(string(p))
 		player.CursorPosition = parseCursorPosition(p)
 		s.broadcastCursorPosition(player)
 	}

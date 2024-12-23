@@ -1,4 +1,6 @@
-"use strict";
+import { BlockSimpleFactory } from "./blockSimpleFactory.js";
+import { Drawer } from "./drawer.js";
+import { WsDriver } from "./ws-conns.js";
 const canvas = document.getElementById("game");
 const canvasParent = canvas.parentElement.getBoundingClientRect();
 const ctx = canvas.getContext("2d");
@@ -6,21 +8,22 @@ canvas.width = canvasParent === null || canvasParent === void 0 ? void 0 : canva
 canvas.height = canvasParent === null || canvasParent === void 0 ? void 0 : canvasParent.height;
 ctx.fillStyle = "white";
 ctx.fillRect(10, 10, canvas.width - 10, canvas.height - 10);
-class Game {
+export class Game {
     constructor(ctx) {
         this.ctx = ctx;
         this.image = new Image(10, 10);
         this.image.onload = this.draw;
-        this.image.src = "./block.jpg";
+        this.image.src = "./images/block.jpg";
         this.cursorImage = new Image(25, 25);
-        this.cursorImage.src = "./cursor.png";
+        this.cursorImage.src = "./images/cursor.png";
         this.cursors = {};
         this.sendCursorTimeout = false;
-        this.websocket = new WebSocket("ws://localhost:8080/ws");
-        this.websocket.onmessage = (event) => {
-            let data = JSON.parse(event.data);
-            this.cursors[data.Id] = data.CursorPosition;
-        };
+        this.gameMatrix = [[]];
+        this.gameObject = [[]];
+        this.isMatrixReady = false;
+        this.blockSimpleFactory = new BlockSimpleFactory();
+        this.drawer = new Drawer(this);
+        this.WsHandler = new WsDriver(this);
         window.addEventListener("resize", () => {
             this.resize();
         });
@@ -33,15 +36,15 @@ class Game {
         this.resize();
     }
     draw() {
+        if (!this.isMatrixReady) {
+            console.log("Matrix not ready yet");
+            return;
+        }
         this.ctx.fillStyle = "black";
         this.ctx.fillRect(0, 0, this.ctx.canvas.width, this.ctx.canvas.height);
         this.ctx.fillStyle = "#87ceeb"; //cyan 
         this.ctx.fillRect(10, 10, this.ctx.canvas.width - 20, this.ctx.canvas.height - 20);
-        for (let y = 500; y < this.ctx.canvas.height; y += 100) {
-            for (let x = 10; x < this.ctx.canvas.width; x += 100) {
-                this.ctx.drawImage(this.image, x, y, 100, 100);
-            }
-        }
+        this.drawer.drawBlocks();
         this.drawCursors();
         requestAnimationFrame(() => {
             this.draw();
@@ -58,7 +61,7 @@ class Game {
     sendCursorPosition(event) {
         if (this.sendCursorTimeout)
             return;
-        this.websocket.send(`${event.clientX} ${event.clientY}`);
+        this.WsHandler.conn.send(`${event.clientX} ${event.clientY}`);
         this.sendCursorTimeout = true;
         setTimeout(() => {
             this.sendCursorTimeout = false;
