@@ -14,6 +14,8 @@ type Block struct {
 	health int
 }
 
+var directions = [4][2]int{{0, 1}, {1, 0}, {0, -1}, {-1, 0}}
+
 func parseMatrixUpdate(rawMessage []byte) [2]int {
 	type MatrixUpdate struct {
 		Type            ClientMessageType `json:"type"`
@@ -31,16 +33,24 @@ func parseMatrixUpdate(rawMessage []byte) [2]int {
 }
 
 func updateServerMatrixAfterUpdate(modifiedIndeces []int, server *Server) {
-	currentBlock := &server.GameObjectMatrix[modifiedIndeces[0]][modifiedIndeces[1]]
-	currentBlock.health--
+	for _, direction := range directions {
+		if (modifiedIndeces[0]+direction[0] < len(server.GameMatrix) && modifiedIndeces[0]+direction[0] >= 0) &&
+			(modifiedIndeces[1]+direction[1] < len(server.GameMatrix[modifiedIndeces[0]]) && modifiedIndeces[1]+direction[1] >= 0) {
 
-	if currentBlock.health == 0 {
-		currentBlock.id = -1
-		currentBlock.name = "Empty"
-		currentBlock.health = -1
-		server.GameMatrix[modifiedIndeces[0]][modifiedIndeces[1]] = -1
+			if modifiedIndeces[0] == 0 || server.GameObjectMatrix[modifiedIndeces[0]+direction[0]][modifiedIndeces[1]+direction[1]].id == -1 {
+				currentBlock := &server.GameObjectMatrix[modifiedIndeces[0]][modifiedIndeces[1]]
+				currentBlock.health--
+
+				if currentBlock.health == 0 {
+					currentBlock.id = -1
+					currentBlock.name = "Empty"
+					currentBlock.health = -1
+					server.GameMatrix[modifiedIndeces[0]][modifiedIndeces[1]] = -1
+				}
+				break
+			}
+		}
 	}
-	fmt.Println(currentBlock)
 }
 
 func initializeAndGenerateMatrices(server *Server) {

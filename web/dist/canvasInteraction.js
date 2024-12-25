@@ -1,6 +1,7 @@
 export class CanvasHandler {
     constructor(game) {
         this.game = game;
+        this.directions = [[0, 1], [1, 0], [0, -1], [-1, 0]];
     }
     handleMouseDown(event) {
         mainLoop: for (let i = 0; i < this.game.gameObject.length; i++) {
@@ -13,7 +14,15 @@ export class CanvasHandler {
                     if (currentBlock.id === -1) {
                         break mainLoop;
                     }
-                    this.game.WsHandler.sendMatrixUpdate([i, j]);
+                    for (const [left, right] of this.directions) {
+                        if ((i + left < this.game.gameObject.length && i + left >= 0) &&
+                            (j + right < this.game.gameObject[i].length && j + right >= 0)) {
+                            if (this.game.gameObject[i + left][j + right].id === -1 || i === 0) {
+                                this.game.WsHandler.sendMatrixUpdate([i, j]);
+                                break;
+                            }
+                        }
+                    }
                 }
             }
         }
