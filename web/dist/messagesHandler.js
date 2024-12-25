@@ -10,29 +10,29 @@ export class MessagesHandler {
             this.game.cursors[serverMessage.id] = serverMessage.CursorPosition;
     }
     handleGameMatrix(serverMessage) {
+        console.log(serverMessage);
         if (serverMessage.type === ServerMessageType.GameMaxtrix) {
+            console.log("Am primit mesaj sa updatez matricea");
             this.game.gameMatrix = serverMessage.gameMatrix;
-            console.log(this.game.gameMatrix);
+            //console.log(this.game.gameObject)
             this.game.gameObject = Array(this.game.gameMatrix.length)
                 .fill(null)
                 .map(() => []);
             let y = 400;
             for (let i = 0; i < this.game.gameMatrix.length; i++) {
-                y += 100;
+                y += this.game.blockSize;
                 let x = 10;
                 for (let j = 0; j < this.game.gameMatrix[i].length; j++) {
                     const blockType = this.game.gameMatrix[i][j];
                     let currBlock = this.blockSimpleFactory.returnBlock(blockType);
                     currBlock.posX = x;
                     currBlock.posY = y;
-                    x += 100;
-                    console.log(currBlock);
+                    x += this.game.blockSize;
                     this.game.gameObject[i].push(currBlock);
                 }
             }
             this.game.isMatrixReady = true;
-            this.game.draw();
+            this.game.drawer.draw();
         }
-        console.log("PLACEHOLDER MATRICE");
     }
 }

@@ -1,6 +1,7 @@
 import { Block } from "./blocks.js";
 export var BlockType;
 (function (BlockType) {
+    BlockType[BlockType["Empty"] = -1] = "Empty";
     BlockType[BlockType["Grass"] = 0] = "Grass";
     BlockType[BlockType["Diamond"] = 1] = "Diamond";
     BlockType[BlockType["Stone"] = 2] = "Stone";
@@ -9,6 +10,10 @@ export class BlockSimpleFactory {
     returnBlock(blockType) {
         let block;
         switch (blockType) {
+            case -1:
+                block = new Block(-1, "Empty", -1, 0, 0);
+                //block.setImageSrc("./images/empty.webp");
+                return block;
             case 0:
                 block = new Block(0, "Grass", 1, 0, 0);
                 block.setImageSrc("./images/block.jpg");

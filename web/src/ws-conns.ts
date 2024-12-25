@@ -4,6 +4,7 @@ import { MessagesHandler } from "./messagesHandler.js";
 export enum ServerMessageType {
     CursorPosition = 1,
     GameMaxtrix = 2,
+    ServerGameMatrixUpdate = 3,
 }
 
 export type ServerMessage = {
@@ -13,15 +14,23 @@ export type ServerMessage = {
 } | {
     type: ServerMessageType.GameMaxtrix;
     gameMatrix: number[][];
+} | {
+    type: ServerMessageType.ServerGameMatrixUpdate,
+
 }
 
 enum ClientMessageType {
-    CursorPosition = 1,
+    ClientCursorPosition = 1,
+    ClientGameMatrix = 2,
+    ClientGameMatrixUpdate = 3,
 }
 
 type ClientMessage = {
-    type: ClientMessageType.CursorPosition;
+    type: ClientMessageType.ClientCursorPosition;
     CursorPosition: number[];
+} | {
+    type: ClientMessageType.ClientGameMatrixUpdate;
+    UpdatedPosition: number[]
 }
 
 export class WsDriver {
@@ -41,8 +50,16 @@ export class WsDriver {
 
     public sendCursorPosition(userCursorPosition: number[]) {
         const msg: ClientMessage = {
-            type: ClientMessageType.CursorPosition,
+            type: ClientMessageType.ClientCursorPosition,
             CursorPosition: userCursorPosition
+        }
+        this.send(msg)
+    }
+
+    public sendMatrixUpdate(updatedPosition: number[]) {
+        const msg: ClientMessage = {
+            type: ClientMessageType.ClientGameMatrixUpdate,
+            UpdatedPosition: updatedPosition
         }
         this.send(msg)
     }
@@ -58,6 +75,9 @@ export class WsDriver {
             case ServerMessageType.GameMaxtrix:
                 this.serverMessagesHandler.handleGameMatrix(msg)
                 break;
+            case ServerMessageType.ServerGameMatrixUpdate:
+                this.serverMessagesHandler.handleGameMatrix(msg)
+                break
 
         }
     }

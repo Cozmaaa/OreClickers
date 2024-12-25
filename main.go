@@ -8,9 +8,10 @@ import (
 )
 
 type Server struct {
-	Players    map[*Player]bool `json:"-"`
-	GameMatrix [][]int          `json:"gameMatrix"`
-	NextId     int              `json:"-"`
+	Players          map[*Player]bool `json:"-"`
+	GameObjectMatrix [][]Block        `json:"-"`
+	GameMatrix       [][]int          `json:"gameMatrix"`
+	NextId           int              `json:"-"`
 }
 
 type Player struct {
@@ -29,9 +30,10 @@ var upgrader = websocket.Upgrader{
 
 func newServer() *Server {
 	return &Server{
-		Players:    make(map[*Player]bool),
-		NextId:     1,
-		GameMatrix: generateMatrix(),
+		Players:          make(map[*Player]bool),
+		NextId:           1,
+		GameObjectMatrix: [][]Block{},
+		GameMatrix:       [][]int{},
 	}
 }
 
@@ -72,9 +74,7 @@ func (s *Server) handleWs(w http.ResponseWriter, r *http.Request) {
 			break
 		}
 
-		// fmt.Println(string(p))
-		player.CursorPosition = parseCursorPosition(p)
-		s.broadcastCursorPosition(player)
+		handleClientMessages(p, player, s)
 	}
 }
 
@@ -82,6 +82,7 @@ func main() {
 	fmt.Println("Hello , world!")
 	static := http.Dir("./web/dist/")
 	server := newServer()
+	initializeAndGenerateMatrices(server)
 
 	http.Handle("/", http.FileServer(static))
 	http.HandleFunc("/ws", server.handleWs)

@@ -3,10 +3,13 @@ export var ServerMessageType;
 (function (ServerMessageType) {
     ServerMessageType[ServerMessageType["CursorPosition"] = 1] = "CursorPosition";
     ServerMessageType[ServerMessageType["GameMaxtrix"] = 2] = "GameMaxtrix";
+    ServerMessageType[ServerMessageType["ServerGameMatrixUpdate"] = 3] = "ServerGameMatrixUpdate";
 })(ServerMessageType || (ServerMessageType = {}));
 var ClientMessageType;
 (function (ClientMessageType) {
-    ClientMessageType[ClientMessageType["CursorPosition"] = 1] = "CursorPosition";
+    ClientMessageType[ClientMessageType["ClientCursorPosition"] = 1] = "ClientCursorPosition";
+    ClientMessageType[ClientMessageType["ClientGameMatrix"] = 2] = "ClientGameMatrix";
+    ClientMessageType[ClientMessageType["ClientGameMatrixUpdate"] = 3] = "ClientGameMatrixUpdate";
 })(ClientMessageType || (ClientMessageType = {}));
 export class WsDriver {
     constructor(game) {
@@ -19,8 +22,15 @@ export class WsDriver {
     }
     sendCursorPosition(userCursorPosition) {
         const msg = {
-            type: ClientMessageType.CursorPosition,
+            type: ClientMessageType.ClientCursorPosition,
             CursorPosition: userCursorPosition
+        };
+        this.send(msg);
+    }
+    sendMatrixUpdate(updatedPosition) {
+        const msg = {
+            type: ClientMessageType.ClientGameMatrixUpdate,
+            UpdatedPosition: updatedPosition
         };
         this.send(msg);
     }
@@ -31,6 +41,9 @@ export class WsDriver {
                 this.serverMessagesHandler.handleCursorOnServer(msg);
                 break;
             case ServerMessageType.GameMaxtrix:
+                this.serverMessagesHandler.handleGameMatrix(msg);
+                break;
+            case ServerMessageType.ServerGameMatrixUpdate:
                 this.serverMessagesHandler.handleGameMatrix(msg);
                 break;
         }

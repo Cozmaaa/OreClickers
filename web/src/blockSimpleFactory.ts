@@ -1,6 +1,7 @@
 import { Block } from "./blocks.js";
 
 export enum BlockType {
+    Empty = -1,
     Grass,
     Diamond,
     Stone
@@ -10,6 +11,10 @@ export class BlockSimpleFactory {
         let block: Block
 
         switch (blockType) {
+            case -1:
+                block = new Block(-1, "Empty", -1, 0, 0);
+                //block.setImageSrc("./images/empty.webp");
+                return block;
             case 0:
                 block = new Block(0, "Grass", 1, 0, 0);
                 block.setImageSrc("./images/block.jpg")

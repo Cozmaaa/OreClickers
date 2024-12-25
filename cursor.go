@@ -1,22 +1,16 @@
 package main
 
 import (
-	"bytes"
 	"encoding/json"
 	"fmt"
-	"strconv"
 
 	"github.com/gorilla/websocket"
 )
 
 func parseCursorPosition(message []byte) [2]int {
-	parts := bytes.Split(message, []byte(" "))
-	x, err1 := strconv.Atoi(string(parts[0]))
-	y, err2 := strconv.Atoi(string(parts[1]))
-	if err1 != nil || err2 != nil {
-		panic(err1)
-	}
-	return [2]int{x, y}
+	var cursorPositionMessage Message
+	json.Unmarshal(message, &cursorPositionMessage)
+	return [2]int{cursorPositionMessage.CursorPosition[0], cursorPositionMessage.CursorPosition[1]}
 }
 
 func (s *Server) broadcastCursorPosition(player *Player) {
