@@ -44,7 +44,6 @@ func handleClientMessages(rawMessage []byte, player *Player, server *Server) {
 	case ClientGameMatrixUpdate:
 		fmt.Println("Am primit call cu update la matrice")
 		updatedPos := parseMatrixUpdate(rawMessage)
-		updateServerMatrixAfterUpdate(updatedPos[:], server)
-		server.broadcastServerGameMatrix()
+		updateServerMatrixAfterUpdate(updatedPos, server)
 	}
 }

@@ -36,6 +36,7 @@ export class WsDriver {
     }
     handleMessage(e) {
         const msg = JSON.parse(e.data);
+        console.log(msg);
         switch (msg.type) {
             case ServerMessageType.CursorPosition:
                 this.serverMessagesHandler.handleCursorOnServer(msg);
@@ -44,7 +45,7 @@ export class WsDriver {
                 this.serverMessagesHandler.handleGameMatrix(msg);
                 break;
             case ServerMessageType.ServerGameMatrixUpdate:
-                this.serverMessagesHandler.handleGameMatrix(msg);
+                this.serverMessagesHandler.handleUpdateGameMatrix(msg);
                 break;
         }
     }

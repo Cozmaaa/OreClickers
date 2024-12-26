@@ -24,6 +24,11 @@ type MatrixMessage struct {
 	Type   ServerMessageType `json:"type"`
 }
 
+type MatrixUpdatePositionMessage struct {
+	UpdatedPosition [2]int            `json:"updatedMatrixPosition"`
+	Type            ServerMessageType `json:"type"`
+}
+
 type BaseMessageType struct {
 	Type ServerMessageType `json:"type"`
 }

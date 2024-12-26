@@ -32,7 +32,7 @@ func parseMatrixUpdate(rawMessage []byte) [2]int {
 	return msgUpdatedMatrixPosition.UpdatedPosition
 }
 
-func updateServerMatrixAfterUpdate(modifiedIndeces []int, server *Server) {
+func updateServerMatrixAfterUpdate(modifiedIndeces [2]int, server *Server) {
 	for _, direction := range directions {
 		if (modifiedIndeces[0]+direction[0] < len(server.GameMatrix) && modifiedIndeces[0]+direction[0] >= 0) &&
 			(modifiedIndeces[1]+direction[1] < len(server.GameMatrix[modifiedIndeces[0]]) && modifiedIndeces[1]+direction[1] >= 0) {
@@ -46,6 +46,8 @@ func updateServerMatrixAfterUpdate(modifiedIndeces []int, server *Server) {
 					currentBlock.name = "Empty"
 					currentBlock.health = -1
 					server.GameMatrix[modifiedIndeces[0]][modifiedIndeces[1]] = -1
+					server.broadcastServerGameMatrixUpdate(modifiedIndeces)
+
 				}
 				break
 			}
@@ -53,12 +55,12 @@ func updateServerMatrixAfterUpdate(modifiedIndeces []int, server *Server) {
 	}
 }
 
-func initializeAndGenerateMatrices(server *Server) {
-	server.GameMatrix = make([][]int, 25)
-	server.GameObjectMatrix = make([][]Block, 25)
+func initializeAndGenerateMatrices(server *Server, matrixSize int) {
+	server.GameMatrix = make([][]int, matrixSize)
+	server.GameObjectMatrix = make([][]Block, matrixSize)
 	for i := 0; i < len(server.GameMatrix); i++ {
-		server.GameMatrix[i] = make([]int, 25)
-		server.GameObjectMatrix[i] = make([]Block, 25)
+		server.GameMatrix[i] = make([]int, matrixSize)
+		server.GameObjectMatrix[i] = make([]Block, matrixSize)
 		for j := 0; j < len(server.GameMatrix[i]); j++ {
 			server.GameMatrix[i][j] = rand.Intn(3)
 			block, err := generateObjectGameMatrix(server.GameMatrix[i][j])
@@ -96,6 +98,27 @@ func (s *Server) broadcastServerGameMatrix() {
 
 	for players := range s.Players {
 		err := players.Conn.WriteMessage(websocket.TextMessage, jsonMatrixMessage)
+		if err != nil {
+			players.Conn.Close()
+			panic(err)
+		}
+	}
+}
+
+func (s *Server) broadcastServerGameMatrixUpdate(updatedPos [2]int) {
+	fmt.Println("Am trimis update position de la matrice la user")
+	var matrixPositionUpdate MatrixUpdatePositionMessage
+	matrixPositionUpdate.Type = ServerGameMatrixUpdate
+	matrixPositionUpdate.UpdatedPosition = updatedPos
+
+	jsonMatrixUpdateMessage, err := json.Marshal(matrixPositionUpdate)
+	if err != nil {
+		fmt.Println("Erroare marshall matrixpositionupdate")
+		panic(err)
+	}
+
+	for players := range s.Players {
+		err := players.Conn.WriteMessage(websocket.TextMessage, jsonMatrixUpdateMessage)
 		if err != nil {
 			players.Conn.Close()
 			panic(err)

@@ -22,6 +22,10 @@ export class Drawer {
     }
     drawGameMatrix(i, j, x, y) {
         this.game.ctx.drawImage(this.game.gameObject[i][j].image, x, y, this.game.blockSize, this.game.blockSize);
+        if (this.game.gameObject[i][j].id !== -1) {
+            this.game.ctx.lineWidth = 1;
+            this.game.ctx.strokeRect(x, y, this.game.blockSize, this.game.blockSize);
+        }
     }
     draw() {
         if (!this.game.isMatrixReady) {

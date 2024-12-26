@@ -16,9 +16,9 @@ export type ServerMessage = {
     gameMatrix: number[][];
 } | {
     type: ServerMessageType.ServerGameMatrixUpdate,
+    updatedMatrixPosition: number[],
 
 }
-
 enum ClientMessageType {
     ClientCursorPosition = 1,
     ClientGameMatrix = 2,
@@ -67,6 +67,7 @@ export class WsDriver {
     private handleMessage(e: MessageEvent) {
 
         const msg = JSON.parse(e.data) as ServerMessage;
+        console.log(msg)
 
         switch (msg.type) {
             case ServerMessageType.CursorPosition:
@@ -76,7 +77,7 @@ export class WsDriver {
                 this.serverMessagesHandler.handleGameMatrix(msg)
                 break;
             case ServerMessageType.ServerGameMatrixUpdate:
-                this.serverMessagesHandler.handleGameMatrix(msg)
+                this.serverMessagesHandler.handleUpdateGameMatrix(msg)
                 break
 
         }

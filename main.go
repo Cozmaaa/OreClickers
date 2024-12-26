@@ -51,7 +51,7 @@ func (s *Server) handleWs(w http.ResponseWriter, r *http.Request) {
 	s.NextId++
 	s.Players[player] = true
 
-	s.broadcastServerGameMatrix()
+	go s.broadcastServerGameMatrix()
 	defer func() {
 		delete(s.Players, player)
 		conn.Close()
@@ -75,6 +75,7 @@ func (s *Server) handleWs(w http.ResponseWriter, r *http.Request) {
 		}
 
 		handleClientMessages(p, player, s)
+		// fmt.Println("Am primit un call cu ", string(p))
 	}
 }
 
@@ -82,7 +83,7 @@ func main() {
 	fmt.Println("Hello , world!")
 	static := http.Dir("./web/dist/")
 	server := newServer()
-	initializeAndGenerateMatrices(server)
+	initializeAndGenerateMatrices(server, 70)
 
 	http.Handle("/", http.FileServer(static))
 	http.HandleFunc("/ws", server.handleWs)

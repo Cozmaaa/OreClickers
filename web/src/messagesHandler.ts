@@ -15,7 +15,6 @@ export class MessagesHandler {
     }
 
     handleGameMatrix(serverMessage: ServerMessage) {
-        console.log(serverMessage)
         if (serverMessage.type === ServerMessageType.GameMaxtrix) {
             console.log("Am primit mesaj sa updatez matricea")
             this.game.gameMatrix = serverMessage.gameMatrix;
@@ -42,5 +41,15 @@ export class MessagesHandler {
             this.game.isMatrixReady = true;
             this.game.drawer.draw()
         }
+    }
+
+    handleUpdateGameMatrix(serverMessage: ServerMessage) {
+        if (serverMessage.type === ServerMessageType.ServerGameMatrixUpdate) {
+            console.log(serverMessage.updatedMatrixPosition)
+            const [i, j] = serverMessage.updatedMatrixPosition;
+            this.game.gameObject[i][j] = this.blockSimpleFactory.returnBlock(-1)
+            this.game.gameMatrix[i][j] = -1
+        }
+        this.game.drawer.draw()
     }
 }
