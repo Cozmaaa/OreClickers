@@ -53,7 +53,7 @@ export class Game {
         });
 
         window.addEventListener("mousedown", (event: MouseEvent) => {
-            this.canvasHandler.handleMouseDown(event)
+            this.canvasHandler.handleMouseDownBinarySearch(event)
 
         })
 

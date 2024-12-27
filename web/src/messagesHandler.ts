@@ -47,7 +47,10 @@ export class MessagesHandler {
         if (serverMessage.type === ServerMessageType.ServerGameMatrixUpdate) {
             console.log(serverMessage.updatedMatrixPosition)
             const [i, j] = serverMessage.updatedMatrixPosition;
-            this.game.gameObject[i][j] = this.blockSimpleFactory.returnBlock(-1)
+            this.game.gameObject[i][j].id = -1;
+            this.game.gameObject[i][j].health = -1;
+            this.game.gameObject[i][j].name = "Empty";
+            this.game.gameObject[i][j].setImageSrc('')
             this.game.gameMatrix[i][j] = -1
         }
         this.game.drawer.draw()

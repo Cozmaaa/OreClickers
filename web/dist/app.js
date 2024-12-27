@@ -30,7 +30,7 @@ export class Game {
             this.WsHandler.sendCursorPosition(currentCursorPosition);
         });
         window.addEventListener("mousedown", (event) => {
-            this.canvasHandler.handleMouseDown(event);
+            this.canvasHandler.handleMouseDownBinarySearch(event);
         });
         requestAnimationFrame(() => {
             this.drawer.draw();
