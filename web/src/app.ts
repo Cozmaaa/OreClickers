@@ -2,6 +2,7 @@ import { Block } from "./blocks.js";
 import { BlockSimpleFactory } from "./blockSimpleFactory.js";
 import { CanvasHandler } from "./canvasInteraction.js";
 import { Drawer } from "./drawer.js";
+import { Player } from "./player.js";
 import { WsDriver } from "./ws-conns.js";
 
 const canvas = document.getElementById("game") as HTMLCanvasElement;
@@ -27,6 +28,11 @@ export class Game {
     drawer: Drawer
     blockSize: number;
     canvasHandler: CanvasHandler;
+    player: Player
+
+    isDragging: boolean;
+    lastMousePosition: number[];
+    offset: { x: number, y: number }
     constructor(ctx: CanvasRenderingContext2D) {
 
         this.ctx = ctx;
@@ -35,12 +41,18 @@ export class Game {
         this.gameMatrix = [[]]
         this.gameObject = [[]]
         this.isMatrixReady = false;
+        this.player = new Player()
+
         this.blockSimpleFactory = new BlockSimpleFactory()
         this.drawer = new Drawer(this)
-        this.blockSize = 100;
+        this.blockSize = 50;
 
         this.WsHandler = new WsDriver(this)
         this.canvasHandler = new CanvasHandler(this)
+
+        this.isDragging = false;
+        this.lastMousePosition = [];
+        this.offset = { x: 0, y: 0 };
 
 
         window.addEventListener("resize", () => {
@@ -48,13 +60,42 @@ export class Game {
         })
 
         window.addEventListener("mousemove", (event) => {
-            const currentCursorPosition = [event.clientX, event.clientY]
+            const currentCursorPosition = [event.clientX - this.offset.x, event.clientY - this.offset.y]
             this.WsHandler.sendCursorPosition(currentCursorPosition)
+            if (this.isDragging) {
+                const dx = event.clientX - this.lastMousePosition[0]
+                const dy = event.clientY - this.lastMousePosition[1]
+                this.offset.x += dx;
+                this.offset.y += dy;
+
+                //We find out how many can be per row/column in order to know how much to let the user move
+                const maxPerCol = Math.ceil(canvas.width / this.blockSize);
+                //Here we have to do extra calculations because the camera starts from y=400 so we need to add 400 pixels of size from the blocks to render 
+                //Also we to substraction  because under we compare with -(this.gameobject) so we basically - - => +
+                const maxPerRow = Math.ceil(canvas.height / this.blockSize) - Math.floor(400 / this.blockSize);
+
+                this.offset.x = Math.min(this.offset.x, 0)
+                this.offset.x = Math.max(this.offset.x, -(this.gameObject[0].length - maxPerCol) * this.blockSize);
+
+                this.offset.y = Math.min(this.offset.y, 0)
+                this.offset.y = Math.max(this.offset.y, -(this.gameObject.length - maxPerRow) * this.blockSize)
+
+
+                this.lastMousePosition[0] = event.clientX;
+                this.lastMousePosition[1] = event.clientY;
+
+            }
         });
 
         window.addEventListener("mousedown", (event: MouseEvent) => {
             this.canvasHandler.handleMouseDownBinarySearch(event)
+            this.isDragging = true;
+            this.lastMousePosition[0] = event.clientX;
+            this.lastMousePosition[1] = event.clientY;
+        })
 
+        window.addEventListener('mouseup', () => {
+            this.isDragging = false;
         })
 
         requestAnimationFrame(() => {

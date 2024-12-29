@@ -41,9 +41,15 @@ export class MessagesHandler {
             this.game.gameObject[i][j].id = -1;
             this.game.gameObject[i][j].health = -1;
             this.game.gameObject[i][j].name = "Empty";
-            this.game.gameObject[i][j].setImageSrc('');
+            this.game.gameObject[i][j].setImageSrc('./images/emptyBlock.png');
             this.game.gameMatrix[i][j] = -1;
         }
         this.game.drawer.draw();
+    }
+    handleBalanceUpdate(serverMessage) {
+        if (serverMessage.type === ServerMessageType.ServerBalanceNotify) {
+            console.log(serverMessage.balance);
+            this.game.player.money = serverMessage.balance;
+        }
     }
 }

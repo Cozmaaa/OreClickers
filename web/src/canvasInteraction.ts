@@ -49,14 +49,18 @@ export class CanvasHandler {
         let right = this.game.gameObject.length - 1;
         let solutionX = -1
         let solutionY = -1
+
+        //This is in order to read the correct blocks when the game is dragged around
+        const offsetedMousePosX = event.clientX - this.game.offset.x;
+        const offsetedMousePosY = event.clientY - this.game.offset.y;
         while (left <= right) {
             counter++
             let mid = left + Math.floor((right - left) / 2);
-            if (event.clientX >= this.game.gameObject[0][mid].posX && event.clientX <= this.game.gameObject[0][mid].posX + this.game.blockSize) {
+            if (offsetedMousePosX >= this.game.gameObject[0][mid].posX && offsetedMousePosX <= this.game.gameObject[0][mid].posX + this.game.blockSize) {
                 solutionX = mid
                 break;
             }
-            else if (event.clientX > this.game.gameObject[0][mid].posX) {
+            else if (offsetedMousePosX > this.game.gameObject[0][mid].posX) {
                 left = mid + 1;
             }
             else {
@@ -73,11 +77,11 @@ export class CanvasHandler {
         while (left <= right) {
             counter++
             let mid = left + Math.floor((right - left) / 2);
-            if (event.clientY >= this.game.gameObject[mid][solutionX].posY && event.clientY <= this.game.gameObject[mid][solutionX].posY + this.game.blockSize) {
+            if (offsetedMousePosY >= this.game.gameObject[mid][solutionX].posY && offsetedMousePosY <= this.game.gameObject[mid][solutionX].posY + this.game.blockSize) {
                 solutionY = mid
                 break;
             }
-            else if (event.clientY > this.game.gameObject[mid][solutionX].posY) {
+            else if (offsetedMousePosY > this.game.gameObject[mid][solutionX].posY) {
                 left = mid + 1;
             }
             else {

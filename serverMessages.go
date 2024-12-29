@@ -11,6 +11,7 @@ const (
 	ServerCursorPosition   ServerMessageType = 1
 	ServerGameMatrix       ServerMessageType = 2
 	ServerGameMatrixUpdate ServerMessageType = 3
+	ServerBalanceNotify    ServerMessageType = 4
 )
 
 type Message struct {
@@ -27,6 +28,11 @@ type MatrixMessage struct {
 type MatrixUpdatePositionMessage struct {
 	UpdatedPosition [2]int            `json:"updatedMatrixPosition"`
 	Type            ServerMessageType `json:"type"`
+}
+
+type playerBalanceNotify struct {
+	NewBalance int               `json:"balance"`
+	Type       ServerMessageType `json:"type"`
 }
 
 type BaseMessageType struct {

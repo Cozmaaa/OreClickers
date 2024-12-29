@@ -4,6 +4,7 @@ export var ServerMessageType;
     ServerMessageType[ServerMessageType["CursorPosition"] = 1] = "CursorPosition";
     ServerMessageType[ServerMessageType["GameMaxtrix"] = 2] = "GameMaxtrix";
     ServerMessageType[ServerMessageType["ServerGameMatrixUpdate"] = 3] = "ServerGameMatrixUpdate";
+    ServerMessageType[ServerMessageType["ServerBalanceNotify"] = 4] = "ServerBalanceNotify";
 })(ServerMessageType || (ServerMessageType = {}));
 var ClientMessageType;
 (function (ClientMessageType) {
@@ -36,7 +37,6 @@ export class WsDriver {
     }
     handleMessage(e) {
         const msg = JSON.parse(e.data);
-        console.log(msg);
         switch (msg.type) {
             case ServerMessageType.CursorPosition:
                 this.serverMessagesHandler.handleCursorOnServer(msg);
@@ -47,6 +47,8 @@ export class WsDriver {
             case ServerMessageType.ServerGameMatrixUpdate:
                 this.serverMessagesHandler.handleUpdateGameMatrix(msg);
                 break;
+            case ServerMessageType.ServerBalanceNotify:
+                this.serverMessagesHandler.handleBalanceUpdate(msg);
         }
     }
 }

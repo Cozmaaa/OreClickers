@@ -13,7 +13,7 @@ export class BlockSimpleFactory {
         switch (blockType) {
             case -1:
                 block = new Block(-1, "Empty", -1, 0, 0);
-                //block.setImageSrc("./images/empty.webp");
+                block.setImageSrc("./images/emptyBlock.png");
                 return block;
             case 0:
                 block = new Block(0, "Grass", 1, 0, 0);
@@ -26,7 +26,7 @@ export class BlockSimpleFactory {
                 return block;
 
             case 2:
-                block = new Block(2, "Stone", 2, 0, 0);
+                block = new Block(2, "Stone", 3, 0, 0);
                 block.setImageSrc('./images/stone.jpg')
                 return block
 

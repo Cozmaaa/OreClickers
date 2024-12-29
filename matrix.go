@@ -32,7 +32,7 @@ func parseMatrixUpdate(rawMessage []byte) [2]int {
 	return msgUpdatedMatrixPosition.UpdatedPosition
 }
 
-func updateServerMatrixAfterUpdate(modifiedIndeces [2]int, server *Server) {
+func updateServerMatrixAfterUpdate(modifiedIndeces [2]int, server *Server, player *Player) {
 	for _, direction := range directions {
 		if (modifiedIndeces[0]+direction[0] < len(server.GameMatrix) && modifiedIndeces[0]+direction[0] >= 0) &&
 			(modifiedIndeces[1]+direction[1] < len(server.GameMatrix[modifiedIndeces[0]]) && modifiedIndeces[1]+direction[1] >= 0) {
@@ -42,6 +42,14 @@ func updateServerMatrixAfterUpdate(modifiedIndeces [2]int, server *Server) {
 				currentBlock.health--
 
 				if currentBlock.health == 0 {
+					blockType, err := generateObjectGameMatrix(currentBlock.id)
+					if err != nil {
+						panic(err)
+					}
+					player.Money += blockType.health
+					notifyUserBalance(player, player.Money)
+					fmt.Println(player.Money)
+
 					currentBlock.id = -1
 					currentBlock.name = "Empty"
 					currentBlock.health = -1

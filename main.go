@@ -18,6 +18,7 @@ type Player struct {
 	Conn           *websocket.Conn `json:"-"`
 	ID             int             `json:"id"`
 	CursorPosition [2]int          `json:"CursorPosition"`
+	Money          int             `json:"money"`
 }
 
 var upgrader = websocket.Upgrader{
@@ -42,6 +43,7 @@ func newPlayer(websocket *websocket.Conn, id int) *Player {
 		Conn:           websocket,
 		ID:             id,
 		CursorPosition: [2]int{0, 0},
+		Money:          0,
 	}
 }
 
@@ -83,7 +85,7 @@ func main() {
 	fmt.Println("Hello , world!")
 	static := http.Dir("./web/dist/")
 	server := newServer()
-	initializeAndGenerateMatrices(server, 70)
+	initializeAndGenerateMatrices(server, 50)
 
 	http.Handle("/", http.FileServer(static))
 	http.HandleFunc("/ws", server.handleWs)
