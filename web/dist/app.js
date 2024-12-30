@@ -25,6 +25,7 @@ export class Game {
         this.WsHandler = new WsDriver(this);
         this.canvasHandler = new CanvasHandler(this);
         this.isDragging = false;
+        this.dragTimeout = 0;
         this.lastMousePosition = [];
         this.offset = { x: 0, y: 0 };
         window.addEventListener("resize", () => {
@@ -53,12 +54,16 @@ export class Game {
         });
         window.addEventListener("mousedown", (event) => {
             this.canvasHandler.handleMouseDownBinarySearch(event);
-            this.isDragging = true;
-            this.lastMousePosition[0] = event.clientX;
-            this.lastMousePosition[1] = event.clientY;
+            //Timeout to not instantly drag
+            this.dragTimeout = setTimeout(() => {
+                this.isDragging = true;
+                this.lastMousePosition[0] = event.clientX;
+                this.lastMousePosition[1] = event.clientY;
+            }, 100);
         });
         window.addEventListener('mouseup', () => {
             this.isDragging = false;
+            clearTimeout(this.dragTimeout);
         });
         requestAnimationFrame(() => {
             this.drawer.draw();

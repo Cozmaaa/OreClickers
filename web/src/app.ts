@@ -33,6 +33,9 @@ export class Game {
     isDragging: boolean;
     lastMousePosition: number[];
     offset: { x: number, y: number }
+
+    dragTimeout: number;
+
     constructor(ctx: CanvasRenderingContext2D) {
 
         this.ctx = ctx;
@@ -51,6 +54,7 @@ export class Game {
         this.canvasHandler = new CanvasHandler(this)
 
         this.isDragging = false;
+        this.dragTimeout = 0;
         this.lastMousePosition = [];
         this.offset = { x: 0, y: 0 };
 
@@ -89,13 +93,19 @@ export class Game {
 
         window.addEventListener("mousedown", (event: MouseEvent) => {
             this.canvasHandler.handleMouseDownBinarySearch(event)
-            this.isDragging = true;
-            this.lastMousePosition[0] = event.clientX;
-            this.lastMousePosition[1] = event.clientY;
+
+            //Timeout to not instantly drag
+            this.dragTimeout = setTimeout(() => {
+                this.isDragging = true;
+                this.lastMousePosition[0] = event.clientX;
+                this.lastMousePosition[1] = event.clientY;
+            }, 100)
+
         })
 
         window.addEventListener('mouseup', () => {
             this.isDragging = false;
+            clearTimeout(this.dragTimeout)
         })
 
         requestAnimationFrame(() => {

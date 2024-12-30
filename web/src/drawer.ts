@@ -1,4 +1,6 @@
 import { Game } from "./app.js"
+import { Block } from "./blocks.js"
+import { BlockSimpleFactory } from "./blockSimpleFactory.js"
 
 export class Drawer {
     game: Game
@@ -6,6 +8,7 @@ export class Drawer {
     cursorImage: HTMLImageElement
     backgroundImage: HTMLImageElement
     coinImage: HTMLImageElement
+    hiddenBlockImage: HTMLImageElement;
 
     constructor(game: Game) {
         this.game = game
@@ -18,6 +21,8 @@ export class Drawer {
         this.image.onload = this.draw;
         this.coinImage = new Image();
         this.coinImage.src = "./images/coin.png"
+        this.hiddenBlockImage = new Image()
+        this.hiddenBlockImage.src = './images/blacked.png'
     }
 
 
@@ -30,36 +35,92 @@ export class Drawer {
 
         const cWidth = ctx.canvas.width;
         const cHeight = ctx.canvas.height;
+        let numberOfRenders = 0;
 
-        mainLoop: for (let row = 0; row < this.game.gameObject.length; row++) {
+        for (let row = 0; row < this.game.gameObject.length; row++) {
+            const rowBlockY = this.game.gameObject[row][0].posY + offsetY;
+            if (rowBlockY > cHeight) {
+                break;
+            }
+            //To make sure the blocks dont render out while still in frame
+            if (rowBlockY + blockSize < 0) {
+                continue;
+            }
+
             for (let col = 0; col < this.game.gameObject[row].length; col++) {
                 const block = this.game.gameObject[row][col];
+                numberOfRenders++;
 
                 // Calculate on-screen coords
                 const screenX = block.posX + offsetX;
-                const screenY = block.posY + offsetY;
 
                 // (Optional) Cull if offscreen
-                if (
-                    screenX + blockSize < 0 || screenX > cWidth ||
-                    screenY + blockSize < 0 || screenY > cHeight
-                ) {
+                if (screenX + blockSize < 0 || screenX > cWidth) {
                     continue;
                 }
-                if (screenY > cHeight) break mainLoop;
-                if (screenX > cWidth) break;
+                const screenY = block.posY + offsetY;
 
                 // Draw
-                ctx.drawImage(block.image, screenX, screenY, blockSize, blockSize);
+                /*ctx.drawImage(block.image, screenX, screenY, blockSize, blockSize);
                 if (block.id !== -1) {
                     ctx.lineWidth = 1;
                     ctx.strokeRect(screenX, screenY, blockSize, blockSize);
+                }*/
+                this.drawBlocksLogic(row, col, screenX, screenY)
+            }
+        }
+        console.log(numberOfRenders)
+    }
+
+    drawBlocksLogic(row: number, col: number, screenX: number, screenY: number) {
+        const hiddenBlock = this.getHiddenBlockImage(); // Use a preloaded hidden block image
+        let isMinedAround = false;
+
+        // Define the directions to check (up, down, left, right)
+        const directions = [
+            [0, 1],  // Right
+            [1, 0],  // Down
+            [-1, 0], // Up
+            [0, -1], // Left
+        ];
+
+        // Check if there are mined blocks around
+        for (const [dx, dy] of directions) {
+            const newRow = row + dx;
+            const newCol = col + dy;
+
+            // Ensure we're within bounds
+            if (newRow >= 0 && newRow < this.game.gameObject.length &&
+                newCol >= 0 && newCol < this.game.gameObject[0].length) {
+                if (this.game.gameObject[newRow][newCol].id === -1) { // Check for mined block
+                    isMinedAround = true;
+                    break;
                 }
             }
         }
+
+        // Draw the appropriate block
+        const ctx = this.game.ctx;
+        const block = this.game.gameObject[row][col];
+
+        if (row === 0 || isMinedAround) {
+            ctx.shadowBlur = 0;
+            ctx.drawImage(block.image, screenX, screenY, this.game.blockSize, this.game.blockSize);
+            if (block.id !== -1) {
+                ctx.lineWidth = 1;
+                ctx.strokeRect(screenX, screenY, this.game.blockSize, this.game.blockSize);
+            }
+        } else {
+            ctx.drawImage(hiddenBlock, screenX, screenY, this.game.blockSize, this.game.blockSize);
+            ctx.lineWidth = 1;
+            ctx.strokeRect(screenX, screenY, this.game.blockSize, this.game.blockSize);
+        }
     }
 
-    draw() {
+    // Helper method to preload the hidden block image
+    private getHiddenBlockImage(): HTMLImageElement {
+        return this.hiddenBlockImage;
+    } draw() {
 
         if (!this.game.isMatrixReady) {
             console.log("Matrix not ready yet")
