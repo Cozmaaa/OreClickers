@@ -23,7 +23,7 @@ export class Game {
         this.drawer = new Drawer(this);
         this.blockSize = 50;
         this.WsHandler = new WsDriver(this);
-        this.canvasHandler = new CanvasHandler(this);
+        this.canvasHandler = new CanvasHandler(this, this.drawer);
         this.isDragging = false;
         this.dragTimeout = 0;
         this.lastMousePosition = [];

@@ -1,6 +1,4 @@
 import { Game } from "./app.js"
-import { Block } from "./blocks.js"
-import { BlockSimpleFactory } from "./blockSimpleFactory.js"
 
 export class Drawer {
     game: Game
@@ -9,6 +7,10 @@ export class Drawer {
     backgroundImage: HTMLImageElement
     coinImage: HTMLImageElement
     hiddenBlockImage: HTMLImageElement;
+    shopImage: HTMLImageElement;
+    isShopOpen: boolean;
+    shopMenuWidth: number;
+    shopMenuHeight: number;
 
     constructor(game: Game) {
         this.game = game
@@ -23,6 +25,11 @@ export class Drawer {
         this.coinImage.src = "./images/coin.png"
         this.hiddenBlockImage = new Image()
         this.hiddenBlockImage.src = './images/blacked.png'
+        this.shopImage = new Image()
+        this.shopImage.src = './images/shop.png'
+        this.isShopOpen = false;
+        this.shopMenuWidth = 1200;
+        this.shopMenuHeight = 700;
     }
 
 
@@ -61,12 +68,13 @@ export class Drawer {
                 const screenY = block.posY + offsetY;
 
                 // Draw
-                /*ctx.drawImage(block.image, screenX, screenY, blockSize, blockSize);
+                ctx.drawImage(block.image, screenX, screenY, blockSize, blockSize);
                 if (block.id !== -1) {
                     ctx.lineWidth = 1;
                     ctx.strokeRect(screenX, screenY, blockSize, blockSize);
-                }*/
-                this.drawBlocksLogic(row, col, screenX, screenY)
+                }
+                //TODO: change this if you want the blocks to be hidden
+                // this.drawBlocksLogic(row, col, screenX, screenY)
             }
         }
         console.log(numberOfRenders)
@@ -135,6 +143,11 @@ export class Drawer {
         this.drawBlocks()
         this.drawCursors()
         this.drawMoney()
+        this.drawShop()
+
+        if (this.isShopOpen) {
+            this.drawShopMenu()
+        }
 
         //Countour
         this.game.ctx.fillStyle = "black";
@@ -163,5 +176,18 @@ export class Drawer {
         this.game.ctx.fillStyle = "black"
         this.game.ctx.fillText(String(this.game.player.money), 50, 50)
         this.game.ctx.drawImage(this.coinImage, 18, 22, 30, 30)
+    }
+
+    drawShop() {
+        this.game.ctx.drawImage(this.shopImage, 0 + this.game.offset.x, 236 + this.game.offset.y, 400, 214)
+    }
+
+    drawShopMenu() {
+        this.game.ctx.fillStyle = "blue";
+        this.game.ctx.fillRect(200, 200, this.shopMenuWidth, this.shopMenuHeight);
+    }
+
+    setIsShopClicked() {
+        this.isShopOpen = true
     }
 }

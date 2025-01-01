@@ -1,13 +1,17 @@
 import { Game } from "./app.js";
+import { Drawer } from "./drawer.js";
 
 export class CanvasHandler {
     game: Game
     directions: number[][]
+    drawer: Drawer;
 
 
-    constructor(game: Game) {
+    constructor(game: Game, drawer: Drawer) {
         this.game = game
         this.directions = [[0, 1], [1, 0], [0, -1], [-1, 0]]
+        this.drawer = drawer;
+
     }
 
 
@@ -43,6 +47,14 @@ export class CanvasHandler {
     }
 
     handleMouseDownBinarySearch(event: MouseEvent) {
+        if (this.drawer.isShopOpen) {
+            this.drawer.isShopOpen = !this.checkIfCloseShop(event)
+            return;
+        }
+        if (this.checkIfShopClicked(event)) {
+            this.drawer.setIsShopClicked()
+        }
+
         let counter = 0;
         let middle = Math.floor(this.game.gameObject.length / 2)
         let left = 0;
@@ -93,6 +105,28 @@ export class CanvasHandler {
             console.log(counter)
         }
 
+    }
+
+    private checkIfShopClicked(event: MouseEvent): boolean {
+
+        const actualClickX = event.clientX - this.game.offset.x;
+        const acutalClickY = event.clientY - this.game.offset.y;
+        if (actualClickX > 0 && actualClickX < 400 &&
+            acutalClickY > 236 && acutalClickY < 214 + 236) {
+            console.log("Shop clicked")
+            return true;
+        }
+        return false;
+    }
+
+    private checkIfCloseShop(event: MouseEvent): boolean {
+
+        if (event.clientX < 200 || event.clientX > 200 + this.drawer.shopMenuWidth ||
+            event.clientY < 200 || event.clientY > 200 + this.drawer.shopMenuHeight) {
+            return true;
+        }
+
+        return false;
     }
 
 }
