@@ -1,4 +1,5 @@
 import { Game } from "./app.js"
+import { Player } from "./player.js"
 
 export class Drawer {
     game: Game
@@ -9,8 +10,7 @@ export class Drawer {
     hiddenBlockImage: HTMLImageElement;
     shopImage: HTMLImageElement;
     isShopOpen: boolean;
-    shopMenuWidth: number;
-    shopMenuHeight: number;
+    player: Player;
 
     constructor(game: Game) {
         this.game = game
@@ -28,8 +28,7 @@ export class Drawer {
         this.shopImage = new Image()
         this.shopImage.src = './images/shop.png'
         this.isShopOpen = false;
-        this.shopMenuWidth = 1200;
-        this.shopMenuHeight = 700;
+        this.player = this.game.player //Maybe we will need to change this later
     }
 
 
@@ -147,6 +146,7 @@ export class Drawer {
 
         if (this.isShopOpen) {
             this.drawShopMenu()
+            this.drawShopMenuItems()
         }
 
         //Countour
@@ -183,11 +183,24 @@ export class Drawer {
     }
 
     drawShopMenu() {
-        this.game.ctx.fillStyle = "blue";
-        this.game.ctx.fillRect(200, 200, this.shopMenuWidth, this.shopMenuHeight);
+        this.game.ctx.fillStyle = "cyan";
+        this.game.ctx.fillRect(200, 200, this.game.ctx.canvas.width - 400, this.game.ctx.canvas.height - 400);
     }
 
-    setIsShopClicked() {
-        this.isShopOpen = true
+    drawShopMenuItems() {
+        const upgradeSizeX = 200;
+        const upgradeSizeY = 200;
+        for (let i = 0; i < this.player.upgrades.length; i++) {
+            //Drawing the upgrade image
+            this.game.ctx.drawImage(this.player.upgrades[i].image, 200 * (i + 1), 200, upgradeSizeX, upgradeSizeY)
+            //Drawing the button background
+            this.game.ctx.fillStyle = "orange";
+            this.game.ctx.fillRect(200 * (i + 1) + 10, upgradeSizeY + 200, upgradeSizeX - 20, 30)
+            //Drawing the price
+            this.game.ctx.fillStyle = "black";
+            this.game.ctx.fillText(String(this.player.upgrades[i].price), 200 * (i + 1) + 75, 200 + upgradeSizeY + 30)
+
+        }
+
     }
 }

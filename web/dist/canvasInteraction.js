@@ -4,40 +4,15 @@ export class CanvasHandler {
         this.directions = [[0, 1], [1, 0], [0, -1], [-1, 0]];
         this.drawer = drawer;
     }
-    handleMouseDown(event) {
-        let counter = 0;
-        mainLoop: for (let i = 0; i < this.game.gameObject.length; i++) {
-            for (let j = 0; j < this.game.gameObject[i].length; j++) {
-                counter++;
-                let currentBlock = this.game.gameObject[i][j];
-                const rightMargin = currentBlock.posX + this.game.blockSize;
-                const downMargin = currentBlock.posY + this.game.blockSize;
-                if ((event.clientX >= currentBlock.posX && event.clientX <= rightMargin) &&
-                    (event.clientY >= currentBlock.posY && event.clientY <= downMargin)) {
-                    if (currentBlock.id === -1) {
-                        break mainLoop;
-                    }
-                    for (const [left, right] of this.directions) {
-                        if ((i + left < this.game.gameObject.length && i + left >= 0) &&
-                            (j + right < this.game.gameObject[i].length && j + right >= 0)) {
-                            if (this.game.gameObject[i + left][j + right].id === -1 || i === 0) {
-                                //this.game.WsHandler.sendMatrixUpdate([i, j]);
-                                console.log(counter);
-                                break;
-                            }
-                        }
-                    }
-                }
-            }
-        }
-    }
     handleMouseDownBinarySearch(event) {
         if (this.drawer.isShopOpen) {
             this.drawer.isShopOpen = !this.checkIfCloseShop(event);
+            this.checkIfButtonClicked(event);
             return;
         }
         if (this.checkIfShopClicked(event)) {
-            this.drawer.setIsShopClicked();
+            this.drawer.isShopOpen = true;
+            return;
         }
         let counter = 0;
         let middle = Math.floor(this.game.gameObject.length / 2);
@@ -98,10 +73,38 @@ export class CanvasHandler {
         return false;
     }
     checkIfCloseShop(event) {
-        if (event.clientX < 200 || event.clientX > 200 + this.drawer.shopMenuWidth ||
-            event.clientY < 200 || event.clientY > 200 + this.drawer.shopMenuHeight) {
+        if (event.clientX < 200 || event.clientX > this.game.ctx.canvas.width - 200 ||
+            event.clientY < 200 || event.clientY > this.game.ctx.canvas.height - 200) {
             return true;
         }
         return false;
+    }
+    checkIfButtonClicked(event) {
+        const upgradeSizeX = 200;
+        const upgradeSizeY = 200;
+        const buttonHeight = 30;
+        const buttonPadding = 10;
+        for (let i = 0; i < this.game.player.upgrades.length; i++) {
+            // Calculate button boundaries
+            const buttonX = 200 * (i + 1) + buttonPadding;
+            const buttonY = upgradeSizeY + 200;
+            const buttonWidth = upgradeSizeX - buttonPadding * 2;
+            // Check if the click is within the button's bounds
+            if (event.clientX >= buttonX &&
+                event.clientX <= buttonX + buttonWidth &&
+                event.clientY >= buttonY &&
+                event.clientY <= buttonY + buttonHeight) {
+                console.log(`Button for upgrade ${this.game.player.upgrades[i].name} clicked!`);
+                // Handle button click, e.g., purchase logic
+                if (this.game.player.money < this.game.player.upgrades[i].price) {
+                    console.log("NU AI BANII NECESARI");
+                    console.log(this.game.player.money + "    price   " + this.game.player.upgrades[i].price);
+                }
+                else {
+                    this.game.player.money -= this.game.player.upgrades[i].price;
+                    this.game.WsHandler.sendUserUpgradeBought(this.game.player.upgrades[i].damage, this.game.player.upgrades[i].price);
+                }
+            }
+        }
     }
 }

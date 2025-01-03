@@ -26,6 +26,7 @@ enum ClientMessageType {
     ClientCursorPosition = 1,
     ClientGameMatrix = 2,
     ClientGameMatrixUpdate = 3,
+    ClientUpgradeBought = 4,
 }
 
 type ClientMessage = {
@@ -34,6 +35,10 @@ type ClientMessage = {
 } | {
     type: ClientMessageType.ClientGameMatrixUpdate;
     UpdatedPosition: number[]
+} | {
+    type: ClientMessageType.ClientUpgradeBought;
+    NewDamage: number;
+    UpgradePrice: number;
 }
 
 export class WsDriver {
@@ -65,6 +70,15 @@ export class WsDriver {
             UpdatedPosition: updatedPosition
         }
         this.send(msg)
+    }
+
+    public sendUserUpgradeBought(newDamage: number, upgradePrice: number) {
+        const msg: ClientMessage = {
+            type: ClientMessageType.ClientUpgradeBought,
+            NewDamage: newDamage,
+            UpgradePrice: upgradePrice,
+        }
+        this.send(msg);
     }
 
     private handleMessage(e: MessageEvent) {

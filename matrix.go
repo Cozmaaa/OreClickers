@@ -39,9 +39,9 @@ func updateServerMatrixAfterUpdate(modifiedIndeces [2]int, server *Server, playe
 
 			if modifiedIndeces[0] == 0 || server.GameObjectMatrix[modifiedIndeces[0]+direction[0]][modifiedIndeces[1]+direction[1]].id == -1 {
 				currentBlock := &server.GameObjectMatrix[modifiedIndeces[0]][modifiedIndeces[1]]
-				currentBlock.health--
+				currentBlock.health -= player.Damage
 
-				if currentBlock.health == 0 {
+				if currentBlock.health <= 0 {
 					blockType, err := generateObjectGameMatrix(currentBlock.id)
 					if err != nil {
 						panic(err)

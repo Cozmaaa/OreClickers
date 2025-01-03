@@ -11,6 +11,7 @@ const (
 	ClientCursorPosition   ClientMessageType = 1
 	ClientGameMatrix       ClientMessageType = 2
 	ClientGameMatrixUpdate ClientMessageType = 3
+	ClientUpgradeBought    ClientMessageType = 4
 )
 
 type ClientCursorPositionMessage struct {
@@ -21,7 +22,7 @@ type ClientCursorPositionMessage struct {
 
 type ClientMatrixUpdateMessage struct {
 	UpdatePosition []int             `json:"UpdatedPosition"`
-	Type           ServerMessageType `json:"type"`
+	Type           ClientMessageType `json:"type"`
 }
 
 type BaseClientMessageType struct {
@@ -45,5 +46,9 @@ func handleClientMessages(rawMessage []byte, player *Player, server *Server) {
 		fmt.Println("Am primit call cu update la matrice")
 		updatedPos := parseMatrixUpdate(rawMessage)
 		updateServerMatrixAfterUpdate(updatedPos, server, player)
+	case ClientUpgradeBought:
+		fmt.Println("Userul a cumparat un upgrade")
+		handleClientUpgradeBought(player, rawMessage)
+		fmt.Println(player.Damage)
 	}
 }

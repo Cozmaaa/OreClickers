@@ -11,6 +11,7 @@ var ClientMessageType;
     ClientMessageType[ClientMessageType["ClientCursorPosition"] = 1] = "ClientCursorPosition";
     ClientMessageType[ClientMessageType["ClientGameMatrix"] = 2] = "ClientGameMatrix";
     ClientMessageType[ClientMessageType["ClientGameMatrixUpdate"] = 3] = "ClientGameMatrixUpdate";
+    ClientMessageType[ClientMessageType["ClientUpgradeBought"] = 4] = "ClientUpgradeBought";
 })(ClientMessageType || (ClientMessageType = {}));
 export class WsDriver {
     constructor(game) {
@@ -32,6 +33,14 @@ export class WsDriver {
         const msg = {
             type: ClientMessageType.ClientGameMatrixUpdate,
             UpdatedPosition: updatedPosition
+        };
+        this.send(msg);
+    }
+    sendUserUpgradeBought(newDamage, upgradePrice) {
+        const msg = {
+            type: ClientMessageType.ClientUpgradeBought,
+            NewDamage: newDamage,
+            UpgradePrice: upgradePrice,
         };
         this.send(msg);
     }

@@ -53,7 +53,6 @@ export class MessagesHandler {
             this.game.gameObject[i][j].setImageSrc('./images/emptyBlock.png')
             this.game.gameMatrix[i][j] = -1
         }
-        this.game.drawer.draw()
     }
 
     handleBalanceUpdate(serverMessage: ServerMessage) {

@@ -19,6 +19,7 @@ type Player struct {
 	ID             int             `json:"id"`
 	CursorPosition [2]int          `json:"CursorPosition"`
 	Money          int             `json:"money"`
+	Damage         int             `json:"damage"`
 }
 
 var upgrader = websocket.Upgrader{
@@ -44,6 +45,7 @@ func newPlayer(websocket *websocket.Conn, id int) *Player {
 		ID:             id,
 		CursorPosition: [2]int{0, 0},
 		Money:          0,
+		Damage:         1,
 	}
 }
 
