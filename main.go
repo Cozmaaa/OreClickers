@@ -67,9 +67,9 @@ func (gs *GlobalServer) handleWs(w http.ResponseWriter, r *http.Request) {
 	gs.NextId++
 	gs.Connections[player] = true
 
-	go s.broadcastServerGameMatrix()
+	// go s.broadcastServerGameMatrix()
 	defer func() {
-		delete(s.Players, player)
+		delete(gs.Connections, player)
 		conn.Close()
 		fmt.Println("Connection with a user ennded")
 	}()
@@ -90,7 +90,7 @@ func (gs *GlobalServer) handleWs(w http.ResponseWriter, r *http.Request) {
 			break
 		}
 
-		handleClientMessages(p, player, s)
+		// handleClientMessages(p, player, s)
 		// fmt.Println("Am primit un call cu ", string(p))
 	}
 }
@@ -98,8 +98,8 @@ func (gs *GlobalServer) handleWs(w http.ResponseWriter, r *http.Request) {
 func main() {
 	fmt.Println("Hello , world!")
 	static := http.Dir("./web/dist/")
-	server := newServer()
-	initializeAndGenerateMatrices(server, 50)
+	server := newGlobalServer()
+	// initializeAndGenerateMatrices(server, 50)
 
 	http.Handle("/", http.FileServer(static))
 	http.HandleFunc("/ws", server.handleWs)
