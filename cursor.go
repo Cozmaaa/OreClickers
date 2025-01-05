@@ -17,7 +17,7 @@ func (s *Server) broadcastCursorPosition(player *Player) {
 	var playerCursorMessage Message
 	playerCursorMessage.CursorPosition = player.CursorPosition
 	playerCursorMessage.Type = ServerCursorPosition
-	playerCursorMessage.Id = player.ID
+	playerCursorMessage.Username = player.Username
 
 	playerData, err := json.Marshal(playerCursorMessage)
 	if err != nil {

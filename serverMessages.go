@@ -16,7 +16,7 @@ const (
 
 type Message struct {
 	Type           ServerMessageType `json:"type"`
-	Id             int               `json:"id"`
+	Username       string            `json:"Username"`
 	CursorPosition [2]int            `json:"CursorPosition"`
 }
 

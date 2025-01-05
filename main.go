@@ -9,14 +9,16 @@ import (
 
 type GlobalServer struct {
 	Connections map[*Player]bool
-	Servers     []Server
+	Servers     []*Server
 	NextId      int `json:"-"`
 }
 
 type Server struct {
+	LobbyName        string           `json:"LobbyName"`
 	Players          map[*Player]bool `json:"-"`
 	GameObjectMatrix [][]Block        `json:"-"`
 	GameMatrix       [][]int          `json:"gameMatrix"`
+	NextId           int              `json:"-"`
 }
 
 type Player struct {
@@ -26,6 +28,7 @@ type Player struct {
 	CursorPosition [2]int          `json:"CursorPosition"`
 	Money          int             `json:"money"`
 	Damage         int             `json:"damage"`
+	ConnectedLobby *Server         `json:"-"`
 }
 
 var upgrader = websocket.Upgrader{
@@ -39,22 +42,24 @@ var upgrader = websocket.Upgrader{
 func newGlobalServer() *GlobalServer {
 	return &GlobalServer{
 		Connections: make(map[*Player]bool),
-		Servers:     []Server{},
+		Servers:     []*Server{},
 	}
 }
 
 func newServer() *Server {
 	return &Server{
 		Players:          make(map[*Player]bool),
+		NextId:           1,
 		GameObjectMatrix: [][]Block{},
 		GameMatrix:       [][]int{},
 	}
 }
 
-func newPlayer(websocket *websocket.Conn, id int) *Player {
+func newPlayer(websocket *websocket.Conn, id int, username string) *Player {
 	return &Player{
 		Conn:           websocket,
 		ID:             id,
+		Username:       username,
 		CursorPosition: [2]int{0, 0},
 		Money:          0,
 		Damage:         1,
@@ -63,7 +68,7 @@ func newPlayer(websocket *websocket.Conn, id int) *Player {
 
 func (gs *GlobalServer) handleWs(w http.ResponseWriter, r *http.Request) {
 	conn, err := upgrader.Upgrade(w, r, nil)
-	player := newPlayer(conn, gs.NextId)
+	player := newPlayer(conn, gs.NextId, "")
 	gs.NextId++
 	gs.Connections[player] = true
 
@@ -90,7 +95,8 @@ func (gs *GlobalServer) handleWs(w http.ResponseWriter, r *http.Request) {
 			break
 		}
 
-		// handleClientMessages(p, player, s)
+		fmt.Println(string(p))
+		handleClientMessages(p, player, player.ConnectedLobby, gs)
 		// fmt.Println("Am primit un call cu ", string(p))
 	}
 }

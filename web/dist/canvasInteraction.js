@@ -89,7 +89,14 @@ export class CanvasHandler {
         console.log("No button clicked");
     }
     handleCreateLobbyKeyboardEvents(event) {
-        this.lobbyName += event.key;
+        event.preventDefault();
+        if (event.key === 'Backspace') {
+            this.lobbyName = this.lobbyName.slice(0, -1);
+        }
+        else if (event.key.length === 1) {
+            // Only append a single character if it's a printable key
+            this.lobbyName += event.key;
+        }
         console.log(this.lobbyName);
         this.drawer.handleDrawState(this.game.gameState, this.lobbyName);
     }
@@ -137,6 +144,12 @@ export class CanvasHandler {
             console.log("Submit Username button clicked");
             // Transition to the IN_GAME state
             this.game.gameState = GAME_STATES.IN_GAME;
+            if (this.createLobby) {
+                this.game.WsHandler.sendClientCreateLobby(this.lobbyName, this.username);
+            }
+            else {
+                this.game.WsHandler.sendClientJoinLobby(this.lobbyName, this.username);
+            }
             this.drawer.handleDrawState(this.game.gameState);
         }
         else {

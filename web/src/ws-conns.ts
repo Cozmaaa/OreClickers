@@ -10,7 +10,7 @@ export enum ServerMessageType {
 
 export type ServerMessage = {
     type: ServerMessageType.CursorPosition;
-    id: number;
+    Username: string;
     CursorPosition: number[];
 } | {
     type: ServerMessageType.GameMaxtrix;
@@ -27,6 +27,8 @@ enum ClientMessageType {
     ClientGameMatrix = 2,
     ClientGameMatrixUpdate = 3,
     ClientUpgradeBought = 4,
+    ClientCreateLobby = 5,
+    ClientJoinLobby = 6,
 }
 
 type ClientMessage = {
@@ -39,6 +41,10 @@ type ClientMessage = {
     type: ClientMessageType.ClientUpgradeBought;
     NewDamage: number;
     UpgradePrice: number;
+} | {
+    type: ClientMessageType.ClientCreateLobby | ClientMessageType.ClientJoinLobby;
+    LobbyName: string;
+    PlayerUsername: string;
 }
 
 export class WsDriver {
@@ -77,6 +83,24 @@ export class WsDriver {
             type: ClientMessageType.ClientUpgradeBought,
             NewDamage: newDamage,
             UpgradePrice: upgradePrice,
+        }
+        this.send(msg);
+    }
+
+    public sendClientCreateLobby(lobbyName: string, username: string) {
+        const msg: ClientMessage = {
+            type: ClientMessageType.ClientCreateLobby,
+            LobbyName: lobbyName,
+            PlayerUsername: username,
+        }
+        this.send(msg);
+    }
+
+    public sendClientJoinLobby(lobbyName: string, username: string) {
+        const msg: ClientMessage = {
+            type: ClientMessageType.ClientJoinLobby,
+            LobbyName: lobbyName,
+            PlayerUsername: username,
         }
         this.send(msg);
     }

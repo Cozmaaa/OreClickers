@@ -11,7 +11,7 @@ export class MessagesHandler {
     }
     handleCursorOnServer(serverMessage: ServerMessage) {
         if (serverMessage.type === ServerMessageType.CursorPosition)
-            this.game.cursors[serverMessage.id] = serverMessage.CursorPosition
+            this.game.cursors[serverMessage.Username] = serverMessage.CursorPosition
     }
 
     handleGameMatrix(serverMessage: ServerMessage) {
@@ -40,6 +40,7 @@ export class MessagesHandler {
             }
             this.game.isMatrixReady = true;
             //this.game.drawer.draw()
+            this.game.drawer.draw()
         }
     }
 

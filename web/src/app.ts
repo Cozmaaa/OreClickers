@@ -78,7 +78,9 @@ export class Game {
 
         window.addEventListener("mousemove", (event) => {
             const currentCursorPosition = [event.clientX - this.offset.x, event.clientY - this.offset.y]
-            this.WsHandler.sendCursorPosition(currentCursorPosition)
+            if (this.gameState === GAME_STATES.IN_GAME) {
+                this.WsHandler.sendCursorPosition(currentCursorPosition)
+            }
             if (this.isDragging) {
                 const dx = event.clientX - this.lastMousePosition[0]
                 const dy = event.clientY - this.lastMousePosition[1]
@@ -118,7 +120,7 @@ export class Game {
 
         })
 
-        window.addEventListener("keypress", (event: KeyboardEvent) => {
+        window.addEventListener("keydown", (event: KeyboardEvent) => {
             this.canvasHandler.handleUserState(this.gameState, event)
         });
 
@@ -150,3 +152,4 @@ export class Game {
 
 const game = new Game(ctx);
 game.drawer.handleDrawState(game.gameState)
+game.drawer.draw();

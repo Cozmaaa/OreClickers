@@ -12,6 +12,8 @@ var ClientMessageType;
     ClientMessageType[ClientMessageType["ClientGameMatrix"] = 2] = "ClientGameMatrix";
     ClientMessageType[ClientMessageType["ClientGameMatrixUpdate"] = 3] = "ClientGameMatrixUpdate";
     ClientMessageType[ClientMessageType["ClientUpgradeBought"] = 4] = "ClientUpgradeBought";
+    ClientMessageType[ClientMessageType["ClientCreateLobby"] = 5] = "ClientCreateLobby";
+    ClientMessageType[ClientMessageType["ClientJoinLobby"] = 6] = "ClientJoinLobby";
 })(ClientMessageType || (ClientMessageType = {}));
 export class WsDriver {
     constructor(game) {
@@ -41,6 +43,22 @@ export class WsDriver {
             type: ClientMessageType.ClientUpgradeBought,
             NewDamage: newDamage,
             UpgradePrice: upgradePrice,
+        };
+        this.send(msg);
+    }
+    sendClientCreateLobby(lobbyName, username) {
+        const msg = {
+            type: ClientMessageType.ClientCreateLobby,
+            LobbyName: lobbyName,
+            PlayerUsername: username,
+        };
+        this.send(msg);
+    }
+    sendClientJoinLobby(lobbyName, username) {
+        const msg = {
+            type: ClientMessageType.ClientJoinLobby,
+            LobbyName: lobbyName,
+            PlayerUsername: username,
         };
         this.send(msg);
     }

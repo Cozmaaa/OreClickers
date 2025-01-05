@@ -12,6 +12,8 @@ const (
 	ClientGameMatrix       ClientMessageType = 2
 	ClientGameMatrixUpdate ClientMessageType = 3
 	ClientUpgradeBought    ClientMessageType = 4
+	ClientCreateLobby      ClientMessageType = 5
+	ClientJoinLobby        ClientMessageType = 6
 )
 
 type ClientCursorPositionMessage struct {
@@ -29,7 +31,7 @@ type BaseClientMessageType struct {
 	Type ClientMessageType `json:"type"`
 }
 
-func handleClientMessages(rawMessage []byte, player *Player, server *Server) {
+func handleClientMessages(rawMessage []byte, player *Player, server *Server, globalServer *GlobalServer) {
 	var baseClientMessage BaseClientMessageType
 
 	err := json.Unmarshal(rawMessage, &baseClientMessage)
@@ -50,5 +52,11 @@ func handleClientMessages(rawMessage []byte, player *Player, server *Server) {
 		fmt.Println("Userul a cumparat un upgrade")
 		handleClientUpgradeBought(player, rawMessage)
 		fmt.Println(player.Damage)
+	case ClientCreateLobby:
+		fmt.Println("Userul a creat un lobby")
+		handleClientCreateLobby(player, rawMessage, globalServer)
+	case ClientJoinLobby:
+		fmt.Println("Userul incearca sa dea join la lobby")
+		handeClientJoinLobby(player, rawMessage, globalServer)
 	}
 }

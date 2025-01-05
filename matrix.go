@@ -33,6 +33,7 @@ func parseMatrixUpdate(rawMessage []byte) [2]int {
 }
 
 func updateServerMatrixAfterUpdate(modifiedIndeces [2]int, server *Server, player *Player) {
+	fmt.Println(server)
 	for _, direction := range directions {
 		if (modifiedIndeces[0]+direction[0] < len(server.GameMatrix) && modifiedIndeces[0]+direction[0] >= 0) &&
 			(modifiedIndeces[1]+direction[1] < len(server.GameMatrix[modifiedIndeces[0]]) && modifiedIndeces[1]+direction[1] >= 0) {
